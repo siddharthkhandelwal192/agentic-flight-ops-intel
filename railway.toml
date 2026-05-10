@@ -1,0 +1,12 @@
+# Railway: https://docs.railway.com/reference/config-as-code
+# Deploy from repo Dockerfile; attach a volume for CHROMA_PERSIST_DIRECTORY in the dashboard.
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 180
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5

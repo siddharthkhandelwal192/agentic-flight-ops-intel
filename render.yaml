@@ -1,0 +1,48 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Connect repo → New Blueprint → select this file, then set secret env vars in dashboard.
+
+services:
+  - type: web
+    name: afois-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: ENV
+        value: prod
+      - key: LOG_LEVEL
+        value: INFO
+      - key: PYTHONPATH
+        value: /app/src
+      - key: CHROMA_PERSIST_DIRECTORY
+        value: /var/data/chroma_db
+      - key: DATABASE_URL
+        sync: false
+      - key: LLM_PROVIDER
+        value: gemini
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash-latest
+      - key: LLM_AUTO_FAILOVER
+        value: "false"
+      - key: LLM_RATE_LIMIT_FALLBACK_REPLY
+        sync: false
+      - key: ADMIN_REINDEX_TOKEN
+        generateValue: true
+      - key: EMBEDDING_PROVIDER
+        value: auto
+      - key: LANGSMITH_TRACING
+        value: "false"
+    disk:
+      name: afois-chroma
+      mountPath: /var/data
+      sizeGB: 1
