@@ -38,7 +38,7 @@ flowchart TB
     RAG["RAG APIs"]
   end
   subgraph Data
-    DB["PostgreSQL / SQLite"]
+    DB["PostgreSQL or SQLite"]
     V["Chroma Vector Store"]
   end
   subgraph Providers
