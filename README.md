@@ -26,24 +26,24 @@
 ```mermaid
 flowchart TB
   subgraph Client
-    WEB[Next.js 15 dashboard]
-    C[Browser / curl / Postman]
+    WEB["Next.js 15 Dashboard"]
+    C["Browser / API Client"]
   end
-  subgraph API[FastAPI]
-    MW[Request ID + timing + CORS]
-    H[/health / ready / llm-config]
-    OPS[/v1/ops/* relational reads]
-    CHAT[/v1/llm/chat]
-    AG[/v1/llm/agents/operations LangGraph]
-    RAG[/v1/rag/* search + admin rebuild]
+  subgraph API["FastAPI"]
+    MW["Request ID + Timing + CORS"]
+    H["Health and Readiness APIs"]
+    OPS["Operations APIs"]
+    CHAT["Chat APIs"]
+    AG["Operations Agent APIs"]
+    RAG["RAG APIs"]
   end
   subgraph Data
-    DB[(PostgreSQL or SQLite)]
-    V[(Chroma persist)]
+    DB["PostgreSQL / SQLite"]
+    V["Chroma Vector Store"]
   end
   subgraph Providers
-    OAI[OpenAI]
-    GEM[Gemini native API]
+    OAI["OpenAI"]
+    GEM["Gemini"]
   end
   WEB -->|REST JSON| API
   C --> MW --> API
