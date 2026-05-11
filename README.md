@@ -27,15 +27,15 @@
 flowchart TB
   subgraph Client
     WEB[Next.js 15 dashboard]
-    C[Browser / curl / Postman]
+    C[Browser curl Postman]
   end
   subgraph API[FastAPI]
     MW[Request ID + timing + CORS]
-    H[/health / ready / llm-config]
-    OPS[/v1/ops/* relational reads]
-    CHAT[/v1/llm/chat]
-    AG[/v1/llm/agents/operations LangGraph]
-    RAG[/v1/rag/* search + admin rebuild]
+    H[health ready llm-config]
+    OPS[v1 ops endpoints relational reads]
+    CHAT[v1 llm chat]
+    AG[v1 llm agents operations LangGraph]
+    RAG[v1 rag endpoints search plus admin rebuild]
   end
   subgraph Data
     DB[(PostgreSQL or SQLite)]
