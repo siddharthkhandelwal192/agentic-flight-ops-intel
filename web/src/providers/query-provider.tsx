@@ -13,7 +13,8 @@ export function QueryProvider({ children }: { children: ReactNode }) {
               if (failureCount >= 2) return false;
               if (error && typeof error === "object" && "status" in error) {
                 const s = (error as { status: number }).status;
-                if (s >= 400 && s < 500 && s !== 408 && s !== 429) return false;
+                // Do not retry client timeouts (apiFetch Abort) or other 4xx; only 429 may retry.
+                if (s >= 400 && s < 500 && s !== 429) return false;
               }
               return true;
             },

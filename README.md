@@ -25,28 +25,28 @@
 
 ```mermaid
 flowchart TB
-  subgraph Client
-    WEB[Next.js 15 dashboard]
-    C[Browser / curl / Postman]
+  subgraph client["Client"]
+    WEB["Next.js 15 dashboard"]
+    C["Browser, curl, Postman"]
   end
-  subgraph API[FastAPI]
-    MW[Request ID + timing + CORS]
-    H[/health / ready / llm-config]
-    OPS[/v1/ops/* relational reads]
-    CHAT[/v1/llm/chat]
-    AG[/v1/llm/agents/operations LangGraph]
-    RAG[/v1/rag/* search + admin rebuild]
+  subgraph api["FastAPI"]
+    MW["Request ID, timing, CORS"]
+    H["Health, readiness, LLM config"]
+    OPS["Ops API relational reads"]
+    CHAT["LLM chat"]
+    AG["LLM agents LangGraph"]
+    RAG["RAG search and admin rebuild"]
   end
-  subgraph Data
+  subgraph data["Data"]
     DB[(PostgreSQL or SQLite)]
     V[(Chroma persist)]
   end
-  subgraph Providers
-    OAI[OpenAI]
-    GEM[Gemini native API]
+  subgraph providers["Providers"]
+    OAI["OpenAI"]
+    GEM["Gemini native API"]
   end
-  WEB -->|REST JSON| API
-  C --> MW --> API
+  WEB -->|"REST via same-origin proxy"| api
+  C --> MW
   OPS --> DB
   AG --> DB
   AG --> V
@@ -67,21 +67,21 @@ sequenceDiagram
   participant U as User
   participant A as FastAPI
   participant G as LangGraph supervisor
-  participant T as SQL / RAG tools
+  participant T as SQL and RAG tools
   participant LLM as LLM provider
-  U->>A: POST /v1/llm/agents/operations
-  A->>G: run graph(messages)
-  G->>LLM: classify intent (structured output)
+  U->>A: POST agents operations JSON
+  A->>G: run graph with messages
+  G->>LLM: classify intent structured output
   alt delay lane
-    G->>T: ORM delay / flight tools
-    T-->>G: rows / aggregates
+    G->>T: ORM delay and flight tools
+    T-->>G: rows and aggregates
   else policy lane
     G->>T: Chroma similarity search
-    T-->>G: policy chunks + metadata
+    T-->>G: policy chunks and metadata
   end
   G->>LLM: specialist synthesis
   LLM-->>G: assistant message
-  G-->>A: intent + reply
+  G-->>A: intent and reply
   A-->>U: JSON response
 ```
 
@@ -159,8 +159,9 @@ cp .env.example .env.local
 # Defaults work with Uvicorn on 127.0.0.1:8000. Override AFOIS_BACKEND_URL if needed.
 
 npm install
+npm run clean   # optional: clears a corrupted .next cache
 npm run dev
-# http://localhost:3000
+# http://localhost:3000 — if the tab never finishes loading, try http://127.0.0.1:3000 (IPv6 localhost quirks on some macOS setups).
 ```
 
 Production build (`next build` bakes rewrites using the **`AFOIS_BACKEND_URL`** / env available at build time; set it in CI or your image build for non-default API hosts):
@@ -409,6 +410,7 @@ GitHub Actions (`.github/workflows/ci.yml`): **Ruff** + **pytest** (Python 3.11)
 | `403` on rebuild | Admin token | Set `ADMIN_REINDEX_TOKEN` + `X-Admin-Token` header |
 | SQLite locked | Multiple writers | Use Postgres via Docker for concurrency |
 | Browser blocked API calls | Bypassing proxy | The app always uses **`/afois-api`**; unset **`NEXT_PUBLIC_API_URL`** in your terminal profile if exported |
+| **`localhost:3000` spins / blank page** | Stale **`.next`** or IPv6 **`localhost`** vs dev bind | Run **`cd web && npm run clean && npm run dev`**; try **http://127.0.0.1:3000**; ensure API is up so fetches do not stall |
 | UI “API unreachable” | API not running or wrong proxy target | Start Uvicorn on **8000**; set **`AFOIS_BACKEND_URL`** if the API is not on `127.0.0.1:8000`; click **Retry** on the banner |
 | `uvicorn` “Address already in use” on **8000** | **Docker Compose** `api` service holds the port | Either keep using that API (`docker compose up`) or run `docker compose stop api` before local Uvicorn |
 | Chat / agent **429** in UI | Provider quota | Set **`LLM_RATE_LIMIT_FALLBACK_REPLY`** in `.env` and pass it into Compose (see `docker-compose.yml`); recreate the `api` container |
